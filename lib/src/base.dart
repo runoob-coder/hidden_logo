@@ -85,14 +85,9 @@ class _HiddenLogoBaseState extends State<HiddenLogoBase>
                       ),
                       child: parser.iPhonesLogoType == LogoType.notch
                           ? widget.notchBuilder(context, constraints)
-                          : ClipRRect(
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(100.0),
-                              ),
-                              child: widget.dynamicIslandBuilder(
-                                context,
-                                constraints,
-                              ),
+                          : widget.dynamicIslandBuilder(
+                              context,
+                              constraints,
                             ),
                     ),
                   ),
