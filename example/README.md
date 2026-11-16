@@ -1,16 +1,30 @@
-# example
+# hidden_logo example
 
-A new Flutter project.
+A Cupertino app with separate notch and Dynamic Island logos.
 
-## Getting Started
+## Run
 
-This project is a starting point for a Flutter application.
+From this directory, with Flutter 3.24.0 or later:
 
-A few resources to get you started if this is your first Flutter project:
+```sh
+flutter pub get
+flutter devices
+flutter run -d <device-id>
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+For iOS, complete Xcode setup and install a simulator runtime. Use CocoaPods with
+Flutter 3.24 or Swift Package Manager with Flutter 3.27 or later on stable.
+A physical iPhone also needs a development team and signing configured in Xcode.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Preview the logo
+
+On a supported iPhone simulator in portrait, take a screenshot using
+Device → Trigger Screenshot. Compare it with the masked simulator view to check
+that the logo fits behind the cutout. Rotate to landscape to check that it hides.
+
+The example uses `LogoVisibilityMode.always`. Change `visibilityMode` in
+[main.dart](lib/main.dart) to try `onlyInBackground`; app-switcher capture timing
+needs a check on a physical device. Other platforms display only the app body.
+
+[Package usage and supported models](../README.md) ·
+[Development and build checks](../CONTRIBUTING.md)

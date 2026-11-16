@@ -511,9 +511,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Verify positioning with expected top margin (11.3 for iPhone 14 Pro)
+      // Verify positioning with expected top margin (12.3 for iPhone 14 Pro)
       final parser = HiddenLogoParser(machineIdentifier: 'iPhone15,2');
-      expect(parser.dynamicIslandTopMargin, equals(11.3));
+      expect(parser.dynamicIslandTopMargin, equals(12.3));
     });
 
     testWidgets('Dynamic Island constraints should be smaller than notch', (
@@ -563,10 +563,8 @@ void main() {
     }
   });
 
-  group('Dynamic Island ClipRRect', () {
-    testWidgets(
-        'Dynamic Island logo should have ClipRRect with rounded corners',
-        (tester) async {
+  group('Dynamic Island rendering', () {
+    testWidgets('Dynamic Island logo should not be clipped', (tester) async {
       await setOrientation(Orientation.portrait);
       const dynamicIslandKey = ValueKey('dynamic_island');
       DeviceInfoService.setMockMachineIdentifier('iPhone15,2');
@@ -574,7 +572,7 @@ void main() {
         const EmptyAppWithHiddenLogo(dynamicIslandKey: dynamicIslandKey),
       );
       await tester.pumpAndSettle();
-      expect(find.byType(ClipRRect), findsOneWidget);
+      expect(find.byType(ClipRRect), findsNothing);
     });
 
     testWidgets('Notch logo should not have ClipRRect', (tester) async {

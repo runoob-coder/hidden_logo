@@ -2,8 +2,8 @@
 
 The **hidden_logo** plugin allows you to add any Flutter widget under the Notch or
 the Dynamic Island for iPhones. It can be your brand logo or its simplified version.
-They will only be visible for users in certain scenarios, for example when a user
-takes a screenshot of your app, minimizes it or uses some kind of screen mirroring.
+The hardware cutout hides the logo during normal portrait use. It can appear in
+screenshots, app-switcher previews or screen mirroring, depending on iOS capture timing.
 
 ![readme_welcome_image.png](readme_welcome_image.png)
 
@@ -12,29 +12,35 @@ takes a screenshot of your app, minimizes it or uses some kind of screen mirrori
 <a href="https://github.com/AndreySosnovyy/hidden_logo"><img src="https://img.shields.io/github/stars/andreysosnovyy/hidden_logo.svg?&style=flat&logo=github&color=red&label=stars" alt="Star on Github"></a>
 </p>
 
-❗No additional checks or manually written conditions are required when using `HiddenLogo`:</br>
+❗No additional checks or manually written conditions are required when using `HiddenLogo`:<br>
 
 - **Application running on any other devices not marked as target ones will not be
-  affected**. Currently, the list of target devices only contains all iPhones starting
-  from iPhone X all the way up to iPhone 17 series. </br>
+  affected**. Supported models range from iPhone X to iPhone 18 Pro and Pro Max. <br>
   You can see the [List of Target iPhones](#iphones-hardware-barrier-types-target-devices) separated by hardware barrier
   type (Notch or Dynamic Island) in the table down below.
-- It provides **precise size constraints for every iPhone**. So you don't need to
-  be worried about the size of your child widget.
+- It provides **maximum size constraints for each supported iPhone** and clips
+  content that paints outside those bounds.
 - Corners of your Dynamic Island widget will be **rounded automatically**.
-- Your child widget will only be visible in **portrait mode**.
+- Your logo is placed only in **portrait mode**.
+- Logo constraints and Dynamic Island positioning adapt to iOS **Display Zoom**.
 
 ## Requirements
 
 - Flutter ≥3.24.0
 - iOS ≥13.0
-- Swift Package Manager works out of the box; CocoaPods is also supported
+- CocoaPods: Flutter ≥3.24.0
+- Swift Package Manager: Flutter ≥3.27.0 on the stable channel
 
 ## Usage
 
-Wrap your `MaterialApp` or `CupertinoApp` with `HiddenLogo` widget or define
-its `builder` function. Then you have to provide 2 builders for 2 cases:
-iPhones with Notch and the ones with Dynamic Island.
+Add the plugin with `flutter pub add hidden_logo`, then import
+`package:hidden_logo/hidden_logo.dart`.
+
+Wrap your `MaterialApp` or `CupertinoApp` with `HiddenLogo`, or use the app
+`builder` as shown below. Use the app builder when your logo needs inherited
+theme or localization, and place it at the full-screen app level.
+Provide two builders: one for iPhones with a notch and one for Dynamic Island.
+`MyNotchLogoBuilder` and `MyDynamicIslandLogoBuilder` below are your own widgets.
 
 ```dart
 @override
@@ -51,31 +57,32 @@ Widget build(BuildContext context) {
         },
       );
     },
+    home: const Scaffold(
+      body: Center(child: Text('App content')),
+    ),
   );
 }
 ```
 
 The size of your brand logo can be adaptive thanks to constraints provided
 by the widget. They define `maxWidth` and `maxHeight` where you can draw and remain hidden.<br>
-All the existing iPhone variants starting from iPhone X are tested, so the widget
-always returns correct max constraints!
+Use the supplied constraints when sizing your logo. See the
+[example app](example/README.md) for notch and Dynamic Island builders.
 
 Also do not forget to define the `BorderRadius` property for your Notch logo widget,
-so it nicely fits under the hardware barrier and is non-visible when not intended to.</br>
+so it nicely fits under the hardware barrier and is non-visible when not intended to.<br>
 
 ## Additional information
 
 ### Recommendations and tips
 
-❌ Do not place kinky visual trash (especially ads) but only your brand or
-application logo. Doing the opposite may cause trouble with releasing
-your app to the store.
+❌ Do not place ads or distracting content here. Use your brand or application logo.
 
 ❌ Do not place any important or sensitive information in the `HiddenLogo` widget.
 Assume that users don't even see your widget there.
 
-❌ Do not set any tap callbacks for your widgets that you place under
-the hardware barriers. Users will not be able to click there.
+❌ Do not put interactive controls under the hardware barrier. The logo ignores
+pointer events and is excluded from keyboard focus and accessibility semantics.
 
 ❌ Do not use the `HiddenLogo` widget if the top of the screen in your app already
 has many details in app bars. Doing the opposite will make it look even more overloaded.
@@ -83,8 +90,10 @@ has many details in app bars. Doing the opposite will make it look even more ove
 ✅ Hide your HiddenLogo widget while the splashscreen is displayed. You can achieve this
 by setting the `isVisible` property to `false` in the `HiddenLogo` widget.
 
-✅ Set the `visibilityMode` of your logo to **only visible in background** if you
-want to hide it for screenshots. But it will still be visible when the app is minimized.
+✅ Set `visibilityMode: LogoVisibilityMode.onlyInBackground` to hide the logo
+while the app is resumed. It is enabled in other lifecycle states, including
+`inactive`, when the app may still be onscreen. iOS capture timing determines
+whether it appears in a screenshot or app-switcher preview.
 
 ✅ If your brand's logo is complicated and has many small details you may want to
 use a simplified version. Or just display its name.
@@ -93,9 +102,12 @@ use a simplified version. Or just display its name.
 
 ### Debugging
 
-To test visual appearance of your widget when developing you can either
-minimize your app or take a screenshot of your app (for ios simulator:
-Device → Trigger Screenshot)
+To preview your logo, use `LogoVisibilityMode.always` and take a screenshot
+(in the iOS simulator: Device → Trigger Screenshot). Compare it with the masked
+simulator view to check that the logo stays behind the hardware cutout.
+
+For `onlyInBackground`, also inspect an app-switcher preview on a real device,
+since capture timing depends on iOS.
 
 ### iPhones hardware barrier types (Target devices)
 
@@ -115,24 +127,26 @@ Device → Trigger Screenshot)
 | 13         | Air            |
 | 13 Mini    | 17 Pro         |
 | 13 Pro     | 17 Pro Max     |
-| 13 Pro Max |                |
-| 14         |                |
+| 13 Pro Max | 18 Pro         |
+| 14         | 18 Pro Max     |
 | 14 Plus    |                |
 | 16e        |                |
 | 17e        |                |
 
 ## About new devices support
 
-When the new iPhones are released, your logos won't appear on their screens because
-the actual shape and size configuration of further devices are unknown in advance.
-But the plugin will be updated as soon as possible when all necessary SDKs are available!
+New iPhones display no logo until their identifiers and cutout geometry are
+verified and explicitly supported. iPhone Duo currently remains without a logo;
+the app body is unaffected.
 
 ### Contribute 🛠
 
-You can also contribute to this plugin on [GitHub](https://github.com/AndreySosnovyy/hidden_logo). </br>
+You can also contribute to this plugin on [GitHub](https://github.com/AndreySosnovyy/hidden_logo). <br>
 Suggest your ideas or bug reports by opening an [issue](https://github.com/AndreySosnovyy/hidden_logo/issues/new) or
 creating a [pull request](https://github.com/AndreySosnovyy/hidden_logo/pulls).
-</br>
-</br>
-</br>
 
+See [Contributing](CONTRIBUTING.md) for development checks and
+[Changelog](CHANGELOG.md) for release history.
+<br>
+<br>
+<br>
